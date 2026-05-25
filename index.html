@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pase de Lista - Crecer en Contreras</title>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            background-color: #d35400; 
+            color: white;
+            width: 100%;
+            text-align: center;
+            padding: 15px 0;
+            margin-bottom: 20px;
+        }
+        #contenedor-escaner {
+            width: 90%;
+            max-width: 400px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        #resultado {
+            margin-top: 15px;
+            padding: 15px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 5px;
+            display: none;
+            white-space: pre-line;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h2>Control de Asistencia</h2>
+    </header>
+
+    <div id="contenedor-escaner">
+        <div id="lector-qr"></div>
+        <div id="resultado"></div>
+    </div>
+
+    <script>
+        // ESTA ES TU LLAVE EXACTA
+        const urlScript = "https://script.google.com/macros/s/AKfycbw09N-PFlRnHMjn_WiNXEaX_eZrv2O7VfwkZ7iUSk8fh4_jWfdIe5sh0HEBQaIpUMrK/exec";
+
+        function alEscanearExito(textoDecodificado) {
+            const divResultado = document.getElementById('resultado');
+            divResultado.style.display = 'block';
+            
+            divResultado.style.backgroundColor = '#fff3cd';
+            divResultado.style.color = '#856404';
+            divResultado.innerText = "Registrando asistencia, espera un segundo...";
+
+            escanerQR.pause(true);
+
+            fetch(`${urlScript}?id=${encodeURIComponent(textoDecodificado)}`)
+                .then(respuesta => respuesta.json())
+                .then(datos => {
+                    if (datos.status === "success") {
+                        divResultado.style.backgroundColor = '#d4edda';
+                        divResultado.style.color = '#155724';
+                        divResultado.innerText = `✅ ¡Asistencia Registrada!\n\nFamilia: ${datos.nombre}\nTotal de personas: ${datos.asistentes}`;
+                    } else {
+                        divResultado.style.backgroundColor = '#f8d7da';
+                        divResultado.style.color = '#721c24';
+                        divResultado.innerText = `❌ Error: El boleto no está registrado en la lista.`;
+                    }
+                })
+                .catch(error => {
+                    divResultado.style.backgroundColor = '#f8d7da';
+                    divResultado.style.color = '#721c24';
+                    divResultado.innerText = "Error de conexión. Revisa tu internet.";
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        divResultado.style.display = 'none';
+                        escanerQR.resume();
+                    },
