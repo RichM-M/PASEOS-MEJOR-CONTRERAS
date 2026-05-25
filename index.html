@@ -6,59 +6,12 @@
     <title>Pase de Lista - Crecer en Contreras</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        header {
-            background-color: #d35400; 
-            color: white;
-            width: 100%;
-            text-align: center;
-            padding: 15px 0;
-            margin-bottom: 20px;
-        }
-        #contenedor-escaner {
-            width: 90%;
-            max-width: 400px;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        #btn-iniciar {
-            padding: 15px 30px;
-            font-size: 18px;
-            font-weight: bold;
-            background-color: #d35400;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-        #lector-qr {
-            width: 100%;
-        }
-        #resultado {
-            margin-top: 15px;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
-            border-radius: 5px;
-            display: none;
-            white-space: pre-line;
-            width: 100%;
-            box-sizing: border-box;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; margin: 0; display: flex; flex-direction: column; align-items: center; }
+        header { background-color: #d35400; color: white; width: 100%; text-align: center; padding: 15px 0; margin-bottom: 20px; }
+        #contenedor-escaner { width: 90%; max-width: 400px; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: flex; flex-direction: column; align-items: center; }
+        #btn-iniciar { padding: 15px 30px; font-size: 18px; font-weight: bold; background-color: #d35400; color: white; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 10px; width: 100%; }
+        #lector-qr { width: 100%; }
+        #resultado { margin-top: 15px; padding: 15px; text-align: center; font-weight: bold; border-radius: 5px; display: none; white-space: pre-line; width: 100%; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -69,19 +22,16 @@
 
     <div id="contenedor-escaner">
         <button id="btn-iniciar">📷 Encender Cámara</button>
-        
         <div id="lector-qr"></div>
         <div id="resultado"></div>
     </div>
 
     <script>
-        // TU LLAVE EXACTA
         const urlScript = "https://script.google.com/macros/s/AKfycbw09N-PFlRnHMjn_WiNXEaX_eZrv2O7VfwkZ7iUSk8fh4_jWfdIe5sh0HEBQaIpUMrK/exec";
 
         function alEscanearExito(textoDecodificado) {
             const divResultado = document.getElementById('resultado');
             divResultado.style.display = 'block';
-            
             divResultado.style.backgroundColor = '#fff3cd';
             divResultado.style.color = '#856404';
             divResultado.innerText = "Registrando asistencia, espera un segundo...";
@@ -98,7 +48,8 @@
                     } else {
                         divResultado.style.backgroundColor = '#f8d7da';
                         divResultado.style.color = '#721c24';
-                        divResultado.innerText = `❌ Error: El boleto no está registrado en la lista.`;
+                        // AQUÍ ESTÁ LA MAGIA: Nos dirá qué leyó exactamente
+                        divResultado.innerText = `❌ Error: El QR dice "${textoDecodificado}", pero no coincide con tu Excel.`;
                     }
                 })
                 .catch(error => {
@@ -114,18 +65,14 @@
                 });
         }
 
-        function alEscanearError(mensajeError) {
-        }
+        function alEscanearError(mensajeError) {}
 
         let escanerQR;
 
-        // Le decimos a la página que encienda la cámara SOLO cuando presiones el botón
         document.getElementById('btn-iniciar').addEventListener('click', function() {
-            // Ocultamos el botón
             this.style.display = 'none';
-            
-            // Iniciamos el escáner
-            let configuracion = { fps: 10, qrbox: { width: 250, height: 250 } };
+            // Bajamos los FPS de 10 a 4 para que lea con más calma
+            let configuracion = { fps: 4, qrbox: { width: 250, height: 250 } };
             escanerQR = new Html5QrcodeScanner("lector-qr", configuracion, false);
             escanerQR.render(alEscanearExito, alEscanearError);
         });
