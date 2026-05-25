@@ -29,6 +29,24 @@
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #btn-iniciar {
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            background-color: #d35400;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        #lector-qr {
+            width: 100%;
         }
         #resultado {
             margin-top: 15px;
@@ -38,6 +56,8 @@
             border-radius: 5px;
             display: none;
             white-space: pre-line;
+            width: 100%;
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -48,12 +68,14 @@
     </header>
 
     <div id="contenedor-escaner">
+        <button id="btn-iniciar">📷 Encender Cámara</button>
+        
         <div id="lector-qr"></div>
         <div id="resultado"></div>
     </div>
 
     <script>
-        // ESTA ES TU LLAVE EXACTA
+        // TU LLAVE EXACTA
         const urlScript = "https://script.google.com/macros/s/AKfycbw09N-PFlRnHMjn_WiNXEaX_eZrv2O7VfwkZ7iUSk8fh4_jWfdIe5sh0HEBQaIpUMrK/exec";
 
         function alEscanearExito(textoDecodificado) {
@@ -88,4 +110,26 @@
                     setTimeout(() => {
                         divResultado.style.display = 'none';
                         escanerQR.resume();
-                    },
+                    }, 4000);
+                });
+        }
+
+        function alEscanearError(mensajeError) {
+        }
+
+        let escanerQR;
+
+        // Le decimos a la página que encienda la cámara SOLO cuando presiones el botón
+        document.getElementById('btn-iniciar').addEventListener('click', function() {
+            // Ocultamos el botón
+            this.style.display = 'none';
+            
+            // Iniciamos el escáner
+            let configuracion = { fps: 10, qrbox: { width: 250, height: 250 } };
+            escanerQR = new Html5QrcodeScanner("lector-qr", configuracion, false);
+            escanerQR.render(alEscanearExito, alEscanearError);
+        });
+    </script>
+
+</body>
+</html>
